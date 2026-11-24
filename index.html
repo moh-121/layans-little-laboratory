@@ -1,1 +1,219 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#17182b">
+<title>Layan's Little Laboratory ✨</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#17182b;color:#fff1df;font-family:Georgia,serif}
+button{font:inherit;cursor:pointer;color:inherit}
+#game{max-width:900px;margin:auto;min-height:100dvh;padding:14px}
+header{text-align:center;padding:12px}
+h1{font-size:clamp(25px,6vw,39px);margin:4px;color:#f6d8a7}
+header p{margin:6px;color:#c9b9d9;font-style:italic}
+#hud{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin:8px 0}
+.pill{background:#292943;border:1px solid #625477;border-radius:20px;padding:8px 13px;font-size:14px}
+#scene{position:relative;overflow:hidden;border:3px solid #78618b;border-radius:18px;min-height:440px;height:min(66vh,590px);background:#25243d}
+#room{position:absolute;inset:0;background:
+radial-gradient(ellipse at 50% 20%,#77709b55,transparent 55%),
+linear-gradient(180deg,#292942 0 68%,#493b53 68% 72%,#30283e 72%)}
+.window{position:absolute;top:7%;left:34%;width:32%;height:31%;border:8px solid #8d7195;border-radius:50% 50% 8px 8px;background:radial-gradient(circle at 50% 45%,#f5d9a2 0 8%,#8d82ad 9% 40%,#303451 70%);box-shadow:0 0 35px #b8a1e655}
+.window:before{content:"";position:absolute;left:48%;top:0;height:100%;width:5px;background:#9b7e9e}
+.window:after{content:"";position:absolute;top:48%;left:0;width:100%;height:5px;background:#9b7e9e}
+.shelf{position:absolute;left:5%;top:27%;width:24%;height:8%;border-bottom:9px solid #8b624e;background:#654b53}
+.shelf:before{content:"";position:absolute;left:0;right:0;bottom:9px;height:38px;background:linear-gradient(90deg,#67b9a3 0 13%,transparent 13% 20%,#bb7798 20% 35%,transparent 35% 45%,#e5c47b 45% 58%,transparent 58% 66%,#82a5c5 66% 80%,transparent 80%)}
+.table{position:absolute;right:5%;bottom:22%;width:36%;height:13%;background:#805b54;border-radius:8px 8px 2px 2px;box-shadow:0 12px 0 #493747}
+.table:before{content:"";position:absolute;left:13%;right:13%;bottom:-45px;height:45px;border-left:12px solid #604653;border-right:12px solid #604653}
+.cauldron{position:absolute;right:15%;bottom:34%;width:75px;height:63px;border-radius:12px 12px 32px 32px;background:linear-gradient(90deg,#343a53,#8c7790,#30334c);border:3px solid #b19aaa;box-shadow:0 0 20px #b18bd766}
+.cauldron:after{content:"";position:absolute;left:9px;right:9px;top:-7px;height:12px;border-radius:50%;background:#8bd6bd;box-shadow:0 0 15px #9affdc}
+.plant{position:absolute;left:12%;bottom:19%;font-size:54px;filter:drop-shadow(0 0 9px #a2d59b)}
+.rug{position:absolute;left:22%;bottom:5%;width:56%;height:19%;border-radius:50%;background:#51415e;border:3px solid #8e718e;transform:perspective(100px) rotateX(12deg)}
+#character{position:absolute;z-index:4;bottom:15%;left:44%;width:100px;height:180px;transition:left .4s ease;filter:drop-shadow(0 8px 5px #17132199)}
+#character svg{width:100%;height:100%;overflow:visible}
+#character .hair{fill:#241c2b}
+#character .skin{fill:#e8b18e}
+#character .dress{fill:#8d719f}
+#character .apron{fill:#ead9c6}
+#character .eye{fill:#342534}
+#character .shine{fill:#fff4cf}
+#character.bounce{animation:bounce .5s}
+@keyframes bounce{50%{transform:translateY(-15px)}}
+.spark{position:absolute;z-index:3;pointer-events:none;color:#ffe7a2;animation:float 2s infinite ease-in-out}
+@keyframes float{50%{transform:translateY(-13px);opacity:.5}}
+#hotspots{position:absolute;inset:0;z-index:5}
+.hotspot{position:absolute;border:1px solid #f3dca966;background:#302842aa;border-radius:14px;padding:8px 10px;font-size:13px;backdrop-filter:blur(5px)}
+.hotspot:active{background:#77628d}
+#dialog{margin:12px 0;padding:15px;background:#292943;border:1px solid #655477;border-radius:14px;line-height:1.5;min-height:76px}
+#controls{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.action{padding:13px 6px;border-radius:12px;border:1px solid #7e6b91;background:#39334e}
+.action:active{transform:scale(.97)}
+.action:disabled{opacity:.35}
+#inventory{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.item{background:#37334d;border:1px solid #71617d;border-radius:20px;padding:7px 11px;font-size:13px}
+#overlay{position:fixed;inset:0;background:#100f20eF;z-index:20;display:none;align-items:center;justify-content:center;padding:18px}
+.panel{width:min(470px,100%);max-height:90dvh;overflow:auto;background:#302b48;border:2px solid #a58ab1;border-radius:20px;padding:23px;text-align:center;box-shadow:0 0 55px #c29bdb33}
+.panel h2{color:#f5d8a8}
+.panel button{background:#80678f;border:0;border-radius:12px;padding:12px 18px;margin:6px}
+.potion{font-size:48px;margin:8px}
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.choices button{background:#45405f;border:1px solid #8e7da1}
+#footer{text-align:center;color:#988ba8;font-size:12px;padding:12px}
+@media(max-width:500px){#scene{min-height:410px;height:55vh}.hotspot{font-size:12px;padding:7px}#character{width:84px;height:155px}.action{font-size:13px}}
+</style>
+</head>
+<body>
+<div id="game">
+<header>
+<h1>✦ Layan's Little Laboratory ✦</h1>
+<p>A tiny magical adventure, made just for you.</p>
+</header>
+<div id="hud">
+<div class="pill">🌙 Moonlight Lab</div>
+<div class="pill">✨ Memories: <span id="count">0</span>/3</div>
+<div class="pill">💗 For Layan</div>
+</div>
+<div id="scene">
+<div id="room">
+<div class="window"></div>
+<div class="shelf"></div>
+<div class="plant">🌿</div>
+<div class="rug"></div>
+<div class="table"></div>
+<div class="cauldron"></div>
+<div class="spark" style="left:20%;top:17%">✦</div>
+<div class="spark" style="left:77%;top:19%;animation-delay:.7s">✧</div>
+<div class="spark" style="left:54%;top:55%;animation-delay:1.1s">✦</div>
+</div>
+<div id="character">
+<svg viewBox="0 0 100 180" aria-label="Layan, the little chemist">
+<path class="hair" d="M23 48 Q8 3 49 5 Q91 2 80 53 L88 125 Q75 151 72 104 L27 110 Q22 151 12 126Z"/>
+<path class="skin" d="M34 35 Q50 17 68 36 L68 69 Q50 86 32 68Z"/>
+<path class="hair" d="M27 44 Q25 8 52 11 Q78 8 75 44 Q62 27 48 31 Q38 29 27 44Z"/>
+<path class="eye" d="M39 51 q4 -4 8 0 q-4 6 -8 0 M55 51 q4 -4 8 0 q-4 6 -8 0"/>
+<path class="shine" d="M42 50h2v2h-2z M58 50h2v2h-2z"/>
+<path d="M46 65 Q51 69 56 64" stroke="#9b5d65" stroke-width="2" fill="none" stroke-linecap="round"/>
+<path class="dress" d="M32 75 Q50 67 69 75 L84 142 L18 142Z"/>
+<path class="apron" d="M39 83 L62 83 L70 139 L30 139Z"/>
+<path d="M35 77 L29 91 M66 77 L72 91" stroke="#e8b18e" stroke-width="9" stroke-linecap="round"/>
+<path d="M35 140 L34 167 M66 140 L67 167" stroke="#e8b18e" stroke-width="10" stroke-linecap="round"/>
+<path d="M23 169h18 M58 169h19" stroke="#c4a5b7" stroke-width="8" stroke-linecap="round"/>
+<path d="M28 79 Q13 88 19 105" stroke="#241c2b" stroke-width="9" fill="none"/>
+<path d="M70 78 Q88 83 81 103" stroke="#241c2b" stroke-width="9" fill="none"/>
+<path d="M46 91 Q50 86 55 91 L53 103 L47 103Z" fill="#b3d8ce"/>
+</svg>
+</div>
+<div id="hotspots">
+<button class="hotspot" style="left:4%;top:39%" onclick="inspect('shelf')">🧪 Ingredient shelf</button>
+<button class="hotspot" style="right:4%;top:53%" onclick="inspect('cauldron')">🫧 Potion station</button>
+<button class="hotspot" style="left:5%;bottom:5%" onclick="inspect('plant')">🌱 Moonflower</button>
+<button class="hotspot" style="right:5%;bottom:5%" onclick="inspect('window')">🌙 Moon window</button>
+</div>
+</div>
+<div id="dialog">Welcome, little chemist. Someone special left a mystery in this laboratory. Let's discover it together. 💗</div>
+<div id="inventory"></div>
+<div id="controls">
+<button class="action" onclick="move(-1)">◀ Walk left</button>
+<button class="action" onclick="talk()">♡ Talk</button>
+<button class="action" onclick="move(1)">Walk right ▶</button>
+</div>
+<div id="footer">Made with a little magic and a lot of love.</div>
+</div>
+
+<div id="overlay">
+<div class="panel" id="panel"></div>
+</div>
+
+<script>
+const state={items:[],position:44,found:{},solved:false,ended:false};
+const $=id=>document.getElementById(id);
+function say(t){$("dialog").textContent=t}
+function update(){
+ $("count").textContent=state.items.length;
+ $("inventory").innerHTML=state.items.map(x=>`<span class="item">${x}</span>`).join("");
+ $("character").style.left=state.position+"%";
+}
+function move(n){
+ if(state.ended)return;
+ state.position=Math.max(8,Math.min(82,state.position+n*7));
+ $("character").classList.remove("bounce");
+ void $("character").offsetWidth;
+ $("character").classList.add("bounce");
+ say(n<0?"Layan wanders toward the old shelves.":"Layan takes a curious little step. ✨");
+}
+function collect(name,emoji){
+ if(state.items.includes(name)){say("You already found this one!");return}
+ state.items.push(name);update();
+ say("You found "+name+" "+emoji+"! A little sparkle joins your collection.");
+}
+function inspect(where){
+ if(state.ended)return;
+ if(where==="shelf"){
+  openPanel("The ingredient shelf","Three ingredients are hidden around the laboratory. You may need them for something special.",[
+   ["🌸 Find the moonflower","plant"],
+   ["🌙 Look at the moon window","window"],
+   ["🧪 Examine the bottles","bottles"]
+  ]);
+ }
+ if(where==="plant"){
+  if(!state.found.flower){state.found.flower=true;collect("Moonflower petal","🌸")}
+  else say("The moonflower has already shared its magic with you.");
+ }
+ if(where==="window"){
+  if(!state.found.star){state.found.star=true;collect("Stardust","✨")}
+  else say("The moonlight is still shining through the window.");
+ }
+ if(where==="cauldron"){
+  if(state.solved){say("The potion glows softly. Your little experiment worked! 💗");return}
+  if(state.items.length<2){say("The cauldron bubbles. Maybe find some ingredients first.");return}
+  potion();
+ }
+ if(where==="bottles"){
+  if(!state.found.crystal){state.found.crystal=true;collect("Crystal drop","💎")}
+  else say("The bottles are empty now. You've collected their magic.");
+ }
+}
+function openPanel(title,body,buttons){
+ $("panel").innerHTML=`<h2>${title}</h2><p>${body}</p><div class="choices">${buttons.map(b=>`<button onclick="choice('${b[1]}')">${b[0]}</button>`).join("")}</div><p><button onclick="closePanel()">Close</button></p>`;
+ $("overlay").style.display="flex";
+}
+function choice(v){
+ closePanel();
+ if(v==="plant")inspect("plant");
+ if(v==="window")inspect("window");
+ if(v==="bottles")inspect("bottles");
+}
+function closePanel(){$("overlay").style.display="none"}
+function potion(){
+ $("panel").innerHTML=`<div class="potion">🫧</div><h2>The Little Potion Puzzle</h2><p>The cauldron needs the right finishing touch. What should Layan add to awaken a love potion?</p><div class="choices"><button onclick="answer('stardust')">✨ Stardust</button><button onclick="answer('salt')">🧂 Salt</button><button onclick="answer('sand')">⏳ Sand</button><button onclick="answer('ink')">🖋️ Ink</button></div>`;
+ $("overlay").style.display="flex";
+}
+function answer(a){
+ if(a==="stardust"){
+  state.solved=true;
+  $("panel").innerHTML=`<div class="potion">💗</div><h2>It worked!</h2><p>The potion turns pink and fills the room with tiny stars. Layan has discovered that the strongest magic isn't in a bottle. It's in the people we care about.</p><button onclick="closePanel();ending()">Continue ✨</button>`;
+  update();
+ }else{
+  $("panel").innerHTML=`<h2>Not quite! 🌙</h2><p>The potion makes a funny little puff. Try another ingredient.</p><button onclick="potion()">Try again</button>`;
+ }
+}
+function talk(){
+ if(state.ended)return;
+ say("Layan smiles. “I think this place is missing one important ingredient... someone to share its magic with.”");
+}
+function ending(){
+ if(state.ended)return;
+ if(!state.solved){say("The potion is still waiting for its final ingredient.");return}
+ state.ended=true;
+ $("hotspots").style.display="none";
+ $("controls").style.display="none";
+ $("panel").innerHTML=`<div style="font-size:55px">🌙💗✨</div><h2>For Layan</h2><p>Dear Layan,</p><p>Even when things get difficult, you are still someone worth choosing, appreciating, and making an effort for.</p><p>This little laboratory was full of ingredients, but its best discovery was you.</p><p><strong>I'm sorry for the moments I made things harder. I hope we can keep making beautiful memories together.</strong></p><p>With love, always. 💗</p><button onclick="closePanel();say('The laboratory glows warmly. Thank you for playing, Layan. 💗')">Keep this memory ✨</button>`;
+ $("overlay").style.display="flex";
+}
+update();
+</script>
+</body>
+</html>
+
